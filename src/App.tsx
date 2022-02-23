@@ -2,10 +2,10 @@ import React, { useState } from "react"
 import { fetchQuizQuestions } from "./API"
 //Components
 import QuestionCard from "./components/QuestionCard"
+import QuestionSelect from "./components/QuestionSelect"
 
 // Types
 import { QuestionState, Difficulty } from "./API"
-
 
 // Styles
 import { GlobalStyle, Wrapper } from "./App.styles"
@@ -27,16 +27,16 @@ const App = () => {
   const [userAnswers, setUserAnswers] = useState<AnswerObject[]>([])
   const [score, setScore] = useState(0)
   const [gameOver, setGameOver] = useState(true)
-
-  console.log(questions)
+  const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.EASY)
 
   const startTrivia = async () => {
     setLoading(true)
     setGameOver(false)
-
+    
+    console.log('start', difficulty)
     const newQuestions = await fetchQuizQuestions(
       TOTAL_QUESTIONS,
-      Difficulty.EASY
+      difficulty
     )
 
     setQuestion(newQuestions)
@@ -70,8 +70,21 @@ const App = () => {
     const nextQuestion = number + 1
     if (nextQuestion === TOTAL_QUESTIONS) {
       setGameOver(true)
+      setDifficulty(Difficulty.EASY)
     } else {
       setNumber(nextQuestion)
+    }
+  }
+
+  const changeDifficulty = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (e.target.value === "easy") {
+      setDifficulty(Difficulty.EASY)
+    }
+    if (e.target.value === "medium") {
+      setDifficulty(Difficulty.MEDIUM)
+    }
+    if (e.target.value === "hard") {
+      setDifficulty(Difficulty.HARD)
     }
   }
 
@@ -80,6 +93,11 @@ const App = () => {
     <GlobalStyle />
     <Wrapper>
       <h1>REACT QUIZ</h1>
+      {gameOver || userAnswers.length === TOTAL_QUESTIONS ? (
+        <QuestionSelect 
+        callback={changeDifficulty}
+      />
+      ): null}
       {gameOver || userAnswers.length === TOTAL_QUESTIONS ? (
         <button className="start" onClick={startTrivia}>
         Start
